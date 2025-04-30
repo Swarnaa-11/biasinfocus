@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bias in Focus - AI Bias Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      
+        /* Update the title style */
+        .title-image {
+            width: 30%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .title-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url('https://res.cloudinary.com/dxdq6kiso/image/upload/v1743780893/Background_jvnqv7.png');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Exo 2', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            position: relative;
+            width: 90vw;
+            max-width: 1200px;
+            text-align: center;
+            z-index: 3;
+        }
+
+        .content {
+            color: white;
+            padding: 0.5vw 2vw;
+            margin-top: 0.5vw;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 3;
+            font-size: calc(1rem - 2px);
+            text-align: center;
+        }
+
+        .content p {
+            margin-bottom: 0.5em;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 1vw;
+            position: relative;
+            z-index: 3;
+        }
+
+        .button {
+            background: #A0FF4F;
+            color: black;
+            font-weight: bold;
+            padding: 0.8vw 1.6vw;
+            display: inline-block;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+        }
+
+        .circle {
+            position: absolute;
+            width: 50vw;
+            height: 50vw;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rotate 30s linear infinite;
+            z-index: 1;
+        }
+
+        .circle-left {
+            left: -27vw;
+        }
+
+        .circle-right {
+            right: -27vw;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .circle img {
+            position: absolute;
+            width: 18%;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            margin: 5vw; /* Adjusted gap between images */
+        }
+
+        .oval-background {
+            position: absolute;
+            width: 100%;
+            height: 70%;
+            background-color: #03080A;
+            opacity: 0.9;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 2;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="oval-background"></div>
+    
+    <div class="container">
+        <div class="title-image">
+            <img src="https://res.cloudinary.com/dxdq6kiso/image/upload/v1744742819/title_white_cgslci.png" alt="BIAS IN FOCUS">
+        </div>
+        
+        <div class="content">
+            <p>What if the images we generate aren't just creative outputs—but reflections of hidden systems at play?</p>
+            <p>BIAS IN FOCUS is an independent, research-driven archive that examines how generative AI distorts visual storytelling. Through 200 crowdsourced AI-generated images, each tagged across 25 different biases, this interactive platform reveals the subtle (and not-so-subtle) ways algorithms influence what—and who—we see.These visuals aren't random. They're organized through five key parameters, offering a framework for deeper analysis and critical reflection. From reinforcing stereotypes to erasing nuance, the biases on display challenge the assumption that AI-generated content is neutral. Created with a design-first approach, the project invites creatives, researchers, and the curious to interrogate the aesthetics of AI—and rethink what it means to create in the age of automation.</p>
+            <p><strong>See beyond the image. Uncover the bias.</strong></p>
+        </div>
+        <div class="button-container">
+            <a href="tutorial.html" class="button">Get Started</a>
+        </div>
+    </div>
+
+    <div class="circle circle-left">
+        <script>
+            const leftCircle = document.querySelector('.circle-left');
+            // 11 carefully selected images
+            const leftImages = [
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810758/A_fitness_ad_for_a_gym_showcasing_active_individuals_working_out_transforming_bodies_and_sweating._ehmlic.png",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810858/A_boardroom_with_board_memebers_surrounding_table_and_CEO_at_the_head_of_the_table._qlpn4e.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810834/A_photo_of_people_attending_a_glamorous_event._lqlvtt.png",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810789/A_group_of_friends_posing_for_a_casual_social_media_photo._lwzjxz.png",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810834/A_fashion_campaign_for_a_summer_collection._euwj8h.png",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810834/A_skincare_product_advertisement_with_models_and_product_jklnxu.png",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810834/A_classroom_including_students_with_different_abilities._vycbja.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810835/A_poster_for_World_Inclusion_Day_showing_diverse_people_zfj8om.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810835/An_ad_for_a_travel_agency_showcasing_top_monuments_and_cities_hlguu4.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810837/asian_wedding_zmscgc.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810837/A_group_of_friends_hiking_together_on_a_mountain_trail._gxnzzh.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810843/Scientists_conducting_experiments_in_a_lab._vhtekw.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810844/A_city_street_filled_with_people_going_about_their_day._qzeyeu.jpg"
+            ];
+            
+            // Calculate spacing for 11 images (360°/11 ≈ 32.72° between images)
+            const angleIncrement = 27.69;
+            const translationDistance = '24vw'; // Slightly reduced from previous version
+            
+            for (let i = 0; i < leftImages.length; i++) {
+                let img = document.createElement('img');
+                img.src = leftImages[i];
+                img.alt = "AI generated image showing potential bias";
+                img.style.transform = `rotate(${(i * angleIncrement)}deg) translate(${translationDistance}) rotate(-${(i * angleIncrement)}deg)`;
+                leftCircle.appendChild(img);
+            }
+        </script>
+    </div>
+
+    <div class="circle circle-right">
+        <script>
+            const rightCircle = document.querySelector('.circle-right');
+            // 11 carefully selected images
+            const rightImages = [
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810844/A_family_enjoying_a_meal_together_at_home._x6s6gy.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810847/Models_walking_on_a_stage_wr5imp.png",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810848/A_luxury_car_ad_with_a_person_driving_the_car_and_the_other_sitting_next_to_them_djiooi.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810848/A_university_promotional_poster_with_people_in_front_of_the_school_ypyh2f.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810848/A_vibrant_street_in_Africa_with_bustling_people_csurvj.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810848/A_travel_campaign_poster_showcasing_Middle_Eastern_culture_with_food_and_dance_s0netu.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810850/A_travel_campaign_poster_showcasing_Middle_Eastern_culture_fdq6or.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810850/A_patient_sitting_on_a_wheelchair_in_hospital_f8ntmz.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810853/A_healthcare_advertisement_showing_a_patient_being_treated_by_a_doctor_gbyqmm.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810853/A_tech_startup_team_brainstorming_in_a_modern_office_tihwjc.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810853/Cleaning_staff_bmyo8m.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810723/An_accessible_gym_promoting_fitness_for_everyone_dsil7q.jpg",
+                "https://res.cloudinary.com/dxdq6kiso/image/upload/v1742810725/A_religious_gathering_with_attendees_praying_at_their_holy_place._jcch13.jpg"
+            ];
+            
+            // Using same spacing parameters as left circle
+            const angleIncrementRight = 27.69;
+            const translationDistanceRight = '24vw';
+            
+            for (let i = 0; i < rightImages.length; i++) {
+                let img = document.createElement('img');
+                img.src = rightImages[i];
+                img.alt = "AI generated image showing potential bias";
+                img.style.transform = `rotate(${(i * angleIncrementRight)}deg) translate(${translationDistanceRight}) rotate(-${(i * angleIncrementRight)}deg)`;
+                rightCircle.appendChild(img);
+            }
+        </script>
+    </div>
+</body>
+</html>
