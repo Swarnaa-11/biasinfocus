@@ -332,11 +332,13 @@
     }
 
     .bias-item {
-      pointer-events: auto;
-      cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-    }
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  padding: 2px 0; /* Added to reduce item spacing */
+
+}
 
 .bias-layer, .bias-header, .bias-content {
   -webkit-tap-highlight-color: transparent;
@@ -380,7 +382,7 @@
       width: 345.42px;
       height: 157.5px;
       background-color: #181B1E;
-      padding: 9px 0 9px 20px;
+      padding: 5px 0 5px 20px; /* Reduced from 9px */
       font-weight: 600;
       font-size: 15px;
       color: black;
@@ -392,7 +394,6 @@
       border: none;
       height: 1px;
       background-color: black;
-      margin: 7.2px 0;
       width: calc(100% - 20px);
       margin-left: 0;
     }
@@ -790,6 +791,19 @@
     transform: translateX(var(--translateX)) translateY(var(--translateY)) 
                scale(var(--scale)) rotateY(0) rotateX(0);
   }
+}
+
+/* Touch interaction improvements */
+
+
+/* Prevent touch delay on mobile */
+.bias-layer {
+  touch-action: manipulation;
+}
+
+/* Improve hit targets */
+.bias-content > div {
+  padding: 8px 0;
 }
 
   </style>
@@ -1318,69 +1332,86 @@ function showBiasTagsForCategory(category) {
   }
 }
 
+// ===== PANEL BEHAVIOR =====
+function initializePanelBehavior() {
+  const biasPanel = document.querySelector('.bias-panel');
+  const closeBtn = document.getElementById('closePanel');
 
-    // ===== PANEL BEHAVIOR =====
-    function initializePanelBehavior() {
-      const biasPanel = document.querySelector('.bias-panel');
-      const closeBtn = document.getElementById('closePanel');
+  biasPanel.addEventListener('mouseenter', () => {
+    biasPanel.classList.add('active');
+  });
 
-      biasPanel.addEventListener('mouseenter', () => {
-        biasPanel.classList.add('active');
-      });
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    biasPanel.classList.remove('active');
+  });
 
-      closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        biasPanel.classList.remove('active');
-      });
-
-      biasPanel.addEventListener('mouseleave', (e) => {
-        if (e.clientX < biasPanel.getBoundingClientRect().left) {
-          e.stopPropagation();
-        }
-      });
+  biasPanel.addEventListener('mouseleave', (e) => {
+    if (e.clientX < biasPanel.getBoundingClientRect().left) {
+      e.stopPropagation();
     }
-    
-    // Add touch support for UI elements
-document.querySelectorAll('.bias-item, .bias-layer, nav a').forEach(element => {
-  element.addEventListener('touchstart', (e) => {
-    // Simulate click for touch devices
-    e.preventDefault();
-    e.target.click();
-  }, { passive: false });
-});
+  });
+}
 
-    // ===== LAYER INTERACTIONS =====
+// ===== LAYER INTERACTIONS =====
 function initializeLayerInteractions() {
+  // Initialize layer toggle functionality
   document.querySelectorAll('.bias-layer').forEach(layer => {
-    // Handle layer header clicks
     const header = layer.querySelector('.bias-header');
     
-    // Mouse events
-    header.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleLayer(layer);
-    });
+    // Clear existing listeners
+    header.removeEventListener('click', handleHeaderClick);
+    header.removeEventListener('touchstart', handleHeaderClick);
     
-    // Touch events
-    header.addEventListener('touchstart', (e) => {
+    // Add new unified listener
+    header.addEventListener('click', handleHeaderClick);
+    header.addEventListener('touchstart', handleHeaderClick, { passive: false });
+    
+    function handleHeaderClick(e) {
       e.preventDefault();
       e.stopPropagation();
       toggleLayer(layer);
-    }, { passive: false });
+    }
+  });
 
-    // Make sure bias-item clicks don't bubble up to the layer
-    layer.querySelectorAll('.bias-item').forEach(item => {
-      // Mouse events
-      item.addEventListener('click', (e) => e.stopPropagation());
-      
-      // Touch events
-      item.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        handleClick(item.textContent.trim());
-      }, { passive: false });
+  // Initialize item interactions
+  document.querySelectorAll('.bias-item').forEach(item => {
+    // Clear existing listeners
+    item.removeEventListener('click', handleItemInteraction);
+    item.removeEventListener('touchstart', handleItemInteraction);
+    
+    // Add new listeners
+    item.addEventListener('click', handleItemInteraction);
+    item.addEventListener('touchstart', handleItemInteraction, { 
+      passive: false 
     });
   });
+}
+
+let lastInteractionTime = 0;
+let lastInteractionItem = null;
+
+function handleItemInteraction(e) {
+  // Only prevent default for touch events
+  if (e.type === 'touchstart') {
+    e.preventDefault();
+  }
+  
+  e.stopPropagation();
+  
+  const item = e.currentTarget;
+  const now = Date.now();
+  
+  // Debounce rapid interactions
+  if (now - lastInteractionTime < 300 && lastInteractionItem === item) {
+    return;
+  }
+  
+  lastInteractionTime = now;
+  lastInteractionItem = item;
+  
+  const category = item.textContent.trim();
+  handleClick(category);
 }
 
 function toggleLayer(layer) {
