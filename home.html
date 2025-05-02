@@ -336,11 +336,14 @@
   -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
-  padding: 2px 0; /* Added to reduce item spacing */
-
+  padding: 2px 0; /* Added to reduce item spacing */  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
 }
 
 .bias-layer, .bias-header, .bias-content {
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -966,33 +969,68 @@
 <div id="pinch-visualizer"></div>
 
   <script>
-    // ===== GLOBAL VARIABLES =====
-    let isStacked = false;
-    let currentSelection = null;
-    let firstLoad = true;
-    let scale = 1;
-    let rotateY = 0, rotateX = 0;
-    let translateX = 0, translateY = 0;
-    let isDragging = false;
-    let lastX, lastY;
-    let roamTimeout = null;
-    let currentOverlayIndex = 0;
-    let allImages = [];
-    const overlayCache = {};
-    let isOverlayTransitioning = false;
+  // Global State Variables
+let isStacked = false;
+let currentSelection = null;
+let firstLoad = true;
+let scale = 1;
+let rotateY = 0, rotateX = 0;
+let translateX = 0, translateY = 0;
+let isDragging = false;
+let lastX, lastY;
+let roamTimeout = null;
+let currentOverlayIndex = 0;
+let allImages = [];
+const overlayCache = {};
+let isOverlayTransitioning = false;
 
-    // ===== INITIALIZATION =====
-    document.addEventListener("DOMContentLoaded", () => {
-      initializeOverlay();
-      preloadOverlayImages();
-      createImages();
-      initializeMinimap();
-      initializeBiasDefinitions();
-      initializePanelBehavior();
-      initializeLayerInteractions();
-      startInitialAnimation();
-      initializeTouchControls();
+// Interaction Control Variables
+let lastInteractionTime = 0;
+let isTouchDevice = false;
+
+   // ===== INITIALIZATION =====
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. First add the touch device detection
+  document.addEventListener('touchstart', function detectTouch() {
+    isTouchDevice = true;
+    document.removeEventListener('touchstart', detectTouch);
+  }, { once: true });
+
+  // 2. Add synthetic event blocker
+  document.addEventListener('touchend', (e) => {
+    const preventMouseEvents = (e) => {
+      if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    };
+    
+    document.addEventListener('mouseover', preventMouseEvents, { once: true });
+    document.addEventListener('mousedown', preventMouseEvents, { once: true });
+    document.addEventListener('mouseup', preventMouseEvents, { once: true });
+    document.addEventListener('click', preventMouseEvents, { once: true });
+  }, { passive: false });
+
+  // 3. Original initialization calls (unchanged order)
+  initializeOverlay();
+  preloadOverlayImages();
+  createImages();
+  initializeMinimap();
+  initializeBiasDefinitions();
+  initializePanelBehavior();
+  initializeLayerInteractions(); // <-- This now uses the new event system
+  startInitialAnimation();
+  initializeTouchControls();
+
+  // 4. Add debug logging if needed (optional)
+  if (location.search.includes('debug=events')) {
+    document.querySelectorAll('.bias-item').forEach(item => {
+      const logEvent = (e) => console.log(`${e.type} on ${e.currentTarget.textContent.trim()}`);
+      item.addEventListener('touchstart', logEvent);
+      item.addEventListener('click', logEvent);
     });
+  }
+});
 
     // ===== INITIAL ANIMATION =====
     function startInitialAnimation() {
@@ -1273,6 +1311,25 @@ function showBiasTagsForCategory(category) {
     return;
   }
   
+// ADD THE NEW FUNCTION RIGHT HERE:
+function resetToRoamingState() {
+  const images = document.querySelectorAll(".image");
+  images.forEach(img => {
+    img.style.transition = 'transform 1.8s ease-out';
+    img.style.pointerEvents = 'auto';
+    img.removeAttribute("data-static");
+    
+    const randomX = (Math.random() - 0.5) * 5000;
+    const randomY = (Math.random() - 0.5) * 2000;
+    img.style.transform = `translate(${randomX}px, ${randomY}px)`;
+  });
+
+  currentSelection = null;
+  isStacked = false;
+  document.getElementById('current-selection').classList.remove('visible');
+  startRoaming();
+}
+
   // Select new category (same as existing code)
   currentSelection = categoryName;
   isStacked = true;
@@ -1355,63 +1412,80 @@ function initializePanelBehavior() {
 
 // ===== LAYER INTERACTIONS =====
 function initializeLayerInteractions() {
-  // Initialize layer toggle functionality
+  // Detect touch device
+  document.addEventListener('touchstart', function detectTouch() {
+    isTouchDevice = true;
+    document.removeEventListener('touchstart', detectTouch);
+  }, { once: true });
+
+  // Layer headers
   document.querySelectorAll('.bias-layer').forEach(layer => {
     const header = layer.querySelector('.bias-header');
     
-    // Clear existing listeners
     header.removeEventListener('click', handleHeaderClick);
     header.removeEventListener('touchstart', handleHeaderClick);
     
-    // Add new unified listener
-    header.addEventListener('click', handleHeaderClick);
     header.addEventListener('touchstart', handleHeaderClick, { passive: false });
+    header.addEventListener('click', handleHeaderClick);
     
     function handleHeaderClick(e) {
+      if (e.type === 'click' && isTouchDevice) return;
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
+      
+      const now = performance.now();
+      if (now - lastInteractionTime < 300) return;
+      lastInteractionTime = now;
+      
       toggleLayer(layer);
     }
   });
 
-  // Initialize item interactions
+  // Bias items
   document.querySelectorAll('.bias-item').forEach(item => {
-    // Clear existing listeners
-    item.removeEventListener('click', handleItemInteraction);
-    item.removeEventListener('touchstart', handleItemInteraction);
+    item.removeEventListener('click', handleInteraction);
+    item.removeEventListener('touchstart', handleInteraction);
     
-    // Add new listeners
-    item.addEventListener('click', handleItemInteraction);
-    item.addEventListener('touchstart', handleItemInteraction, { 
-      passive: false 
-    });
+    item.addEventListener('touchstart', handleInteraction, { passive: false });
+    item.addEventListener('click', handleInteraction);
   });
 }
 
-let lastInteractionTime = 0;
-let lastInteractionItem = null;
-
-function handleItemInteraction(e) {
-  // Only prevent default for touch events
-  if (e.type === 'touchstart') {
-    e.preventDefault();
-  }
+function handleInteraction(e) {
+  // Skip synthetic mouse events on touch devices
+  if (e.type === 'click' && isTouchDevice) return;
   
+  // Prevent all default behaviors
+  e.preventDefault();
   e.stopPropagation();
-  
-  const item = e.currentTarget;
-  const now = Date.now();
-  
+  e.stopImmediatePropagation();
+
   // Debounce rapid interactions
-  if (now - lastInteractionTime < 300 && lastInteractionItem === item) {
+  const now = performance.now();
+  if (now - lastInteractionTime < 500) return;
+  lastInteractionTime = now;
+
+  // Process the interaction
+  const category = e.currentTarget.textContent.trim();
+  processCategorySelection(category);
+}
+
+function processCategorySelection(category) {
+  if (currentSelection === category && isStacked) {
+    resetToRoamingState();
     return;
   }
   
-  lastInteractionTime = now;
-  lastInteractionItem = item;
+  const relevantImages = textOverlayImages[category] || [];
+  currentSelection = category;
+  isStacked = true;
   
-  const category = item.textContent.trim();
-  handleClick(category);
+  document.getElementById('current-selection').textContent = category;
+  document.getElementById('current-selection').classList.add('visible');
+  
+  stopRoaming();
+  formStacks(Array.from(document.querySelectorAll(".image")), relevantImages, category);
 }
 
 function toggleLayer(layer) {
