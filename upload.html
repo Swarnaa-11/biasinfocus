@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Page</title>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    body {
+      background: #0C2028 url('https://res.cloudinary.com/dxdq6kiso/image/upload/v1743780893/Background_jvnqv7.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #EAEAEA;
+      overflow: hidden;
+      font-family: 'Exo 2', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(18, 18, 18, 0.6);
+      z-index: -1;
+    }
+
+    nav {
+      position: fixed;
+      top: -3px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      background: transparent;
+      padding: 8px 0;
+      z-index: 1000;
+    }
+
+    nav::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://res.cloudinary.com/dxdq6kiso/image/upload/v1744462983/upload_header_vcqeps.png') no-repeat center center;
+      background-size: contain;
+      z-index: -1;
+    }
+
+    nav a {
+      color: #EAEAEA;
+      text-decoration: none;
+      margin: 0 12px;
+      font-size: 14px;
+      font-weight: 400;
+      padding: 5px 8px;
+      position: relative;
+      z-index: 2;
+    }
+
+    nav a.active {
+      color: #040404;
+      font-weight: 600;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 80px;
+    }
+
+    .upload-heading {
+      color: #EAEAEA;
+      text-align: center;
+      font-size: 16px;
+      margin: -10px 0 20px 0;
+      padding: 0 10px;
+      max-width: 600px;
+      line-height: 1.4;
+      text-shadow: 0 0 5px rgba(160, 255, 79, 0.5);
+    }
+
+    .upload-section {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      width: 100%;
+    }
+
+    .left-panel {
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-right: 100px;
+    }
+
+    .upload-box {
+      width: 300px;
+      height: 300px;
+      border: 1px solid #A0FF4F;
+      background-color: #181B1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .upload-box img.preview {
+      max-width: 100%;
+      max-height: 100%;
+      position: absolute;
+      object-fit: contain;
+    }
+
+    .upload-icon {
+      width: 50px;
+      height: 50px;
+      z-index: 10;
+      cursor: pointer;
+    }
+
+    .upload-text {
+      color: white;
+      text-align: center;
+      position: absolute;
+      bottom: 20px;
+      font-weight: bold;
+    }
+
+    .prompt-box {
+      width: 300px;
+      height: 60px;
+      border: 1px solid #A0FF4F;
+      background-color: #181B1E;
+      color: white;
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .scan-button {
+      margin-top: 3px;
+      padding: 10px 20px;
+      background-color: #A0FF4F;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .right-panel {
+      position: absolute;
+      left: 800px;
+      top: 0;
+      width: 250px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .right-panel.visible {
+      display: flex;
+    }
+
+    .bias-list {
+      color: #ffffff;
+      font-size: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-top: 50px;
+    }
+
+    .reset-button {
+      padding: 10px 20px;
+      background-color: #A2FF00;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .scanning-line {
+      position: absolute;
+      width: 100%;
+      height: 3px;
+      background-color: #A0FF4F;
+      top: 0;
+      left: 0;
+      animation: scan 3s linear forwards;
+      display: none;
+    }
+
+    .history {
+      position: fixed;
+      top: 80px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border: 1px solid #A2FF00;
+      cursor: pointer;
+    }
+
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="home.html">HOME</a>
+    <a href="game.html">GAME</a>
+    <a href="#" class="active">UPLOAD</a>
+    <a href="tutorial.html">TUTORIAL</a>
+  </nav>
+
+  <div class="container">
+    <div class="upload-heading">
+      Upload your AI generated image to evaluate the biases that may be present in it.
+    </div>
+    
+    <div class="upload-section">
+      <div class="left-panel">
+        <div class="upload-box" id="drop-area">
+          <img id="preview" class="preview" style="display: none;" alt="Image preview"/>
+          <img src="https://res.cloudinary.com/dxdq6kiso/image/upload/v1744454685/Upload_njulyo.png" class="upload-icon" id="upload-icon" alt="Upload icon"/>
+          <div class="upload-text">UPLOAD IMAGE</div>
+          <div class="scanning-line" id="scan-line"></div>
+          <input type="file" id="imageUpload" accept="image/*" style="display: none;" />
+        </div>
+        <textarea class="prompt-box" id="promptInput" placeholder="Write prompt used to generate image..."></textarea>
+        <button class="scan-button" id="scanButton">SCAN</button>
+      </div>
+      
+      <div class="right-panel" id="rightPanel">
+        <div class="bias-list" id="biases">
+          <!-- Biases will be populated here -->
+        </div>
+        <button class="reset-button" id="resetButton">Upload New Image</button>
+      </div>
+    </div>
+    
+    <div class="history" id="history"></div>
+  </div>
+
+  <script>
+    const dropArea = document.getElementById('drop-area');
+    const imageUpload = document.getElementById('imageUpload');
+    const preview = document.getElementById('preview');
+    const scanLine = document.getElementById('scan-line');
+    const promptInput = document.getElementById('promptInput');
+    const scanButton = document.getElementById('scanButton');
+    const resetButton = document.getElementById('resetButton');
+    const history = document.getElementById('history');
+    const rightPanel = document.getElementById('rightPanel');
+    const biasesList = document.getElementById('biases');
+    let currentImageSrc = '';
+    
+    // Store all image data including prompts and biases
+    const imageDataMap = new Map();
+    
+    // Predefined image biases
+    const imageBiases = {
+      "Dog with a box on his head.jpg": ["No bias detected"],
+      "Pigeon sitting on a bench.jpg": ["No bias detected"],
+      "A Korean beauty campaign featuring skincare for all skin tones..jpg": [
+        "⚠️ Beauty Standards Bias",
+        "⚠️ Over-Polished Aesthetic",
+        "⚠️ Body Type Bias",
+        "⚠️ Ethnicity Bias",
+        "⚠️ Cultural Context Bias"
+      ],
+      "A Japanese kimono fashion campaign blending modern and traditional styles..jpg": [
+        "⚠️ Cultural Context Bias",
+        "⚠️ Over-Polished Aesthetic",
+        "⚠️ Uniformity Bias",
+        "⚠️ Ethnicity Bias"
+      ],
+      "A home interior styled with a mix of modern and traditional Indian aesthetics..jpg": [
+        "⚠️ Class Bias",
+        "⚠️ Urban-Only Design",
+        "⚠️ Over-Polished Aesthetic",
+        "⚠️ Uniformity Bias",
+        "⚠️ Cultural Context Bias"
+      ],
+      "A campaign for accessible fitness equipment for differently-abled athletes.jpg": [
+        "⚠️ Disability Bias",
+        "⚠️ Over-Polished Aesthetic",
+        "⚠️ Tokenism",
+        "⚠️ Contextual Oversimplification"
+      ],
+      "A promotional campaign for an airline celebrating global connectivity with all airline crew.jpg": [
+        "⚠️ Gender Bias",
+        "⚠️ Over-Polished Aesthetic",
+        "⚠️ Uniformity Bias",
+        "⚠️ Racial Bias",
+        "⚠️ Occupation Bias"
+      ],
+      "Top and most powerful political leaders of the world standing in front of their flags and pose.jpg": [
+        "⚠️ Gender Bias",
+        "⚠️ Racial Bias",
+        "⚠️ Regional Exclusion Bias",
+        "⚠️ Over-Polished Aesthetic"
+      ],
+      "Doctors and nurses working together in a hospital..jpg": [
+        "⚠️ Gender Bias",
+        "⚠️ Beauty Standards Bias",
+        "⚠️ Body Type Bias",
+        "⚠️ Over-Polished Aesthetic",
+        "⚠️ Occupation Bias"
+      ],
+      "Scientists conducting experiments in a lab..jpg": [
+        "⚠️ Gender Bias",
+        "⚠️ Age Bias",
+        "⚠️ Ethnicity Bias",
+        "⚠️ Beauty Standards Bias",
+        "⚠️ Over-Polished Aesthetic"
+      ]
+    };
+
+    // Click to upload
+    document.getElementById('upload-icon').addEventListener('click', () => imageUpload.click());
+
+    // File input change handler
+    imageUpload.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentImageSrc = e.target.result;
+          preview.src = currentImageSrc;
+          preview.style.display = 'block';
+          preview.dataset.filename = file.name;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Drag and drop functionality
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.style.border = '2px dashed #A0FF4F';
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.style.border = '1px solid #A0FF4F';
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.style.border = '1px solid #A0FF4F';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.match('image.*')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentImageSrc = e.target.result;
+          preview.src = currentImageSrc;
+          preview.style.display = 'block';
+          preview.dataset.filename = file.name;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Scan button handler
+    scanButton.addEventListener('click', () => {
+      if (preview.src && promptInput.value.trim() !== '') {
+        scanLine.style.display = 'block';
+        
+        scanLine.addEventListener('animationend', () => {
+          scanLine.style.display = 'none';
+          
+          const filename = preview.dataset.filename;
+          const biases = imageBiases[filename] || ['⚠️ No biases detected'];
+          
+          biasesList.innerHTML = '';
+          biases.forEach(bias => {
+            const biasItem = document.createElement('div');
+            biasItem.textContent = bias;
+            biasesList.appendChild(biasItem);
+          });
+          
+          // Store all data for this image
+          imageDataMap.set(filename, {
+            src: currentImageSrc,
+            prompt: promptInput.value,
+            biases: biases
+          });
+          
+          rightPanel.classList.add('visible');
+        }, { once: true });
+      }
+    });
+
+    // Reset button handler
+    resetButton.addEventListener('click', () => {
+      if (currentImageSrc) {
+        const filename = preview.dataset.filename;
+        const thumb = document.createElement('img');
+        thumb.src = currentImageSrc;
+        thumb.dataset.filename = filename;
+        
+        // Make history images clickable to restore full state
+        thumb.addEventListener('click', () => {
+          const imageData = imageDataMap.get(filename);
+          if (imageData) {
+            preview.src = imageData.src;
+            preview.style.display = 'block';
+            preview.dataset.filename = filename;
+            promptInput.value = imageData.prompt;
+            
+            // Restore biases
+            biasesList.innerHTML = '';
+            imageData.biases.forEach(bias => {
+              const biasItem = document.createElement('div');
+              biasItem.textContent = bias;
+              biasesList.appendChild(biasItem);
+            });
+            
+            rightPanel.classList.add('visible');
+          }
+        });
+        
+        history.appendChild(thumb);
+      }
+      
+      // Reset the upload interface
+      preview.src = '';
+      preview.style.display = 'none';
+      imageUpload.value = '';
+      promptInput.value = '';
+      rightPanel.classList.remove('visible');
+    });
+  </script>
+</body>
+</html>
